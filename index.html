@@ -327,13 +327,72 @@
         </div>
     </div>
 
-    <!-- Visitor Counter แบบเสถียร (Hits.sh) -->
+    <!-- Visitor Counter แบบ Firebase Real-time -->
     <footer class="text-center text-gray-500 mt-6 mb-8 flex flex-col items-center">
         <p class="mb-2 text-xs sm:text-sm font-medium">ยอดการเข้าใช้งานสะสม</p>
-        <div class="inline-flex items-center justify-center p-1.5 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow transition-shadow">
-            <img src="https://hits.sh/medicine-calculator-th-app.svg?label=Visitors&color=3c79f5" alt="Visitor Count" class="h-5 sm:h-6 rounded">
+        <div class="inline-flex items-center gap-2.5 py-2 px-4 bg-white rounded-full shadow-sm border border-gray-200">
+            <div class="bg-blue-100 text-[#3C79F5] w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                <i class="fas fa-eye text-xs"></i>
+            </div>
+            <div class="flex items-baseline gap-1">
+                <span id="visitorCountText" class="font-bold text-lg text-gray-700 leading-none">กำลังโหลด...</span>
+                <span class="text-gray-500 text-[11px] sm:text-xs">ครั้ง</span>
+            </div>
         </div>
     </footer>
+
+<!-- Firebase SDK (ใช้ Type Module เพื่อไม่ให้กวนกับสคริปต์เก่า) -->
+<script type="module">
+    // นำเข้าฟังก์ชันที่จำเป็นจาก Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ⚠️ นำ firebaseConfig ที่ได้จากขั้นตอนที่ 1 มาวางทับตรงนี้ ⚠️
+    const firebaseConfig = {
+        apiKey: "AIzaSyBapwTW8Huf7zcmetKRkIyNU86txcmAGmw",
+        authDomain: "appointed-day-calc.firebaseapp.com",
+        projectId: "appointed-day-calc",
+        storageBucket: "appointed-day-calc.firebasestorage.app",
+        messagingSenderId: "101497292557",
+        appId: "1:101497292557:web:1cdd788465d21809d4d244",
+        measurementId: "G-Y9QCJKEKJP"
+    };
+
+    // เริ่มต้นการเชื่อมต่อ Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // อ้างอิงไปยังกล่องข้อมูล (Document) ชื่อ 'visitors' ในตาราง 'statistics'
+    const counterRef = doc(db, "statistics", "visitors");
+
+    async function updateAndFetchCounter() {
+        try {
+            // ตรวจสอบว่า Session นี้เคยนับไปแล้วหรือยัง (ป้องกันยอดเด้งเวลากด Refresh)
+            const hasVisited = sessionStorage.getItem('hasVisited_Firebase');
+
+            if (!hasVisited) {
+                // หากยังไม่เคยนับ -> สั่งให้ยอด + 1 (และสร้างกล่องข้อมูลให้อัตโนมัติหากยังไม่มี)
+                await setDoc(counterRef, { count: increment(1) }, { merge: true });
+                sessionStorage.setItem('hasVisited_Firebase', 'true');
+            }
+
+            // ดึงค่ายอดล่าสุดมาแสดงผล
+            const docSnap = await getDoc(counterRef);
+            if (docSnap.exists()) {
+                document.getElementById('visitorCountText').innerText = docSnap.data().count.toLocaleString();
+            } else {
+                // กรณีฐานข้อมูลว่างเปล่า (พึ่งสร้างครั้งแรก)
+                document.getElementById('visitorCountText').innerText = "1";
+            }
+        } catch (error) {
+            console.error("Firebase Error:", error);
+            document.getElementById('visitorCountText').innerText = "Error";
+        }
+    }
+
+    // สั่งให้ทำงานเมื่อหน้าเว็บพร้อม
+    updateAndFetchCounter();
+</script>
 
 <script>
     // Global variables
