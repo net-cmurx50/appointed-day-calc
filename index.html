@@ -319,7 +319,8 @@
     <footer class="text-center text-gray-500 text-xs sm:text-sm mt-2 sm:mt-4 mb-8">
         <p class="mb-2">จำนวนผู้เข้าใช้งาน</p>
         <div class="inline-block p-1.5 sm:p-2 bg-white rounded shadow-sm">
-            <img id="visitorBadge" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fmedicine-calculator-th-demo&count_bg=%234F46E5&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false" alt="Visitor Count">
+            <!-- แก้ไขลิงก์รูปภาพให้ใช้ ID ตายตัว (Static ID) และปรับสีให้เข้ากับธีม -->
+            <img id="visitorBadge" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fmedicine-calculator-app&count_bg=%233C79F5&title_bg=%23555555&title=Visitors&edge_flat=false" alt="Visitor Count">
         </div>
     </footer>
 
@@ -376,21 +377,9 @@
         
         renderWeekDaysSelector();
         loadHistory();
-        updateVisitorBadge();
         
         switchTab('forward');
     };
-
-    function updateVisitorBadge() {
-        try {
-            const currentProtocol = window.location.protocol;
-            if (currentProtocol.startsWith('http')) {
-                const currentUrl = encodeURIComponent(window.location.href.split('?')[0]);
-                const badgeUrl = `https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=${currentUrl}&count_bg=%234F46E5&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false`;
-                document.getElementById('visitorBadge').src = badgeUrl;
-            }
-        } catch (e) { console.log("Visitor badge update failed:", e); }
-    }
 
     // --- Shared Options Panel Logic ---
     function selectEditDay(dayId) {
